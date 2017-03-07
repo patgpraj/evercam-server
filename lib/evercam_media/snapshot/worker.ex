@@ -140,6 +140,7 @@ defmodule EvercamMedia.Snapshot.Worker do
   Server callback for camera_reply
   """
   def handle_info({:camera_reply, result, timestamp, reply_to}, state) do
+    GenEvent.sync_notify(state.event_manager, {:wait_and_send_request, state})
     case result do
       {:ok, image} ->
         data = {state.name, timestamp, image}

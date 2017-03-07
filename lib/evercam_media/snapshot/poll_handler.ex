@@ -11,6 +11,11 @@ defmodule EvercamMedia.Snapshot.PollHandler do
     {:ok, state}
   end
 
+  def handle_event({:wait_and_send_request, worker_state}, state) do
+    Poller.wait_send_request(worker_state.poller, worker_state)
+    {:ok, state}
+  end
+
   def handle_event(_, state) do
     {:ok, state}
   end
