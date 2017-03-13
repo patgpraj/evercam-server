@@ -53,8 +53,8 @@ defmodule EvercamMedia.Snapshot.Poller do
   @doc """
   Update the configuration of the camera worker
   """
-  def wait_send_request(cam_server, config) do
-    GenServer.cast(cam_server, {:wait_and_send_request, config})
+  def wait_send_request(cam_server, config, seconds) do
+    GenServer.cast(cam_server, {:wait_and_send_request, config, seconds})
   end
 
 
@@ -93,10 +93,10 @@ defmodule EvercamMedia.Snapshot.Poller do
     {:reply, nil, state}
   end
 
-  def handle_cast({:wait_and_send_request, config}, state) do
+  def handle_cast({:wait_and_send_request, config, seconds}, state) do
     # {:ok, timer} = Map.fetch(state, :timer)
     # :erlang.cancel_timer(timer)
-    Logger.debug "Wait process to complete previous request and then send request."
+    Logger.debug "Seconds: #{seconds}, Wait process to complete previous request and then send request."
 
     timer = start_timer(state.config.sleep, :poll, state.config.is_paused, state.config.pause_seconds)
     {:noreply, Map.merge(state, %{timer: timer})}
