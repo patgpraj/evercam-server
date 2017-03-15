@@ -7,6 +7,7 @@ defmodule EvercamMedia.Snapshot.Worker do
 
   use GenServer
   alias EvercamMedia.Snapshot.CamClient
+  alias EvercamMedia.Snapshot.Poller
 
   ################
   ## Client API ##
@@ -149,7 +150,8 @@ defmodule EvercamMedia.Snapshot.Worker do
         GenEvent.sync_notify(state.event_manager, {:snapshot_error, data})
     end
     seconds = get_seconds(state.config.sleep, request_time)
-    GenEvent.sync_notify(state.event_manager, {:wait_and_send_request, state, seconds})
+    # GenEvent.sync_notify(state.event_manager, {:wait_and_send_request, state, seconds})
+    Poller.wait_send_request(state.poller, state, seconds)
 
     if is_pid(reply_to) do
       send reply_to, result
@@ -216,8 +218,9 @@ defmodule EvercamMedia.Snapshot.Worker do
 
     case Calendar.DateTime.diff(request_end_time, request_time) do
       {:ok, _seconds, microseconds, :after} ->
-        diff = div(microseconds, 1000)
-        sleep - diff
+        # diff = div(microseconds, 1000)
+        # sleep - diff
+        1
       _ -> 0
     end
   end
