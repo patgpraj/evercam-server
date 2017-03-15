@@ -98,7 +98,7 @@ defmodule EvercamMedia.Snapshot.Poller do
     # :erlang.cancel_timer(timer)
     Logger.debug "Seconds: #{seconds}, Wait process to complete previous request and then send request."
 
-    timer = start_timer(state.config.sleep, :poll, state.config.is_paused, state.config.pause_seconds)
+    timer = start_timer(seconds, :poll, state.config.is_paused, state.config.pause_seconds)
     {:noreply, Map.merge(state, %{timer: timer})}
   end
 

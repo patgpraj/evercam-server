@@ -150,8 +150,8 @@ defmodule EvercamMedia.Snapshot.Worker do
         GenEvent.sync_notify(state.event_manager, {:snapshot_error, data})
     end
     seconds = get_seconds(state.config.sleep, request_time)
-    # GenEvent.sync_notify(state.event_manager, {:wait_and_send_request, state, seconds})
-    Poller.wait_send_request(state.poller, state, seconds)
+    GenEvent.sync_notify(state.event_manager, {:wait_and_send_request, state, seconds})
+    # Poller.wait_send_request(state.poller, state, seconds)
 
     if is_pid(reply_to) do
       send reply_to, result
@@ -186,7 +186,7 @@ defmodule EvercamMedia.Snapshot.Worker do
     try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, request_time, 1)
   end
 
-  defp try_snapshot(_state, config, camera_exid, _timestamp, reply_to, worker, request_time, 3) do
+  defp try_snapshot(state, config, camera_exid, _timestamp, reply_to, worker, request_time, 3) do
     spawn fn ->
       timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
       result = CamClient.fetch_snapshot(config)
@@ -213,14 +213,14 @@ defmodule EvercamMedia.Snapshot.Worker do
     end
   end
 
+  defp get_seconds(1000, _request_time), do: 1
   defp get_seconds(sleep, request_time) do
     request_end_time = Calendar.DateTime.now!("UTC")
-
+    sleep = sleep - 1000
     case Calendar.DateTime.diff(request_end_time, request_time) do
       {:ok, _seconds, microseconds, :after} ->
-        # diff = div(microseconds, 1000)
-        # sleep - diff
-        1
+        diff = div(microseconds, 1000)
+        sleep - diff
       _ -> 0
     end
   end
